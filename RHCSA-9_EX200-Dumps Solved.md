@@ -857,7 +857,7 @@ lvs
 df -hT
 ```
 ---
-## Q18. Add a Swap Partition of 512MB and Mount it Permanently
+## Q19. Add a Swap Partition of 512MB and Mount it Permanently
 
 ### Task Description:
 Add a swap partition of **512MB** and mount it permanently.
@@ -945,7 +945,7 @@ Check the system's memory usage including swap:
 free -m
 ```
 ---
-## Q19. Create a Logical Volume of Name "newlv" from a Volume Group Name "newvg"
+## Q20. Create a Logical Volume of Name "newlv" from a Volume Group Name "newvg"
 
 ### Task Description:
 Create a logical volume named **"newlv"** from a volume group named **"newvg"** with physical extents of **16M** and the logical volume size of **50 extents**.
@@ -1040,7 +1040,7 @@ Verify that the new logical volume is mounted:
 ```bash
 df -hT
 ```
-## Q20. Configure System Tuning
+## Q21. Configure System Tuning
 
 ### Task Description:
 Choose the recommended **'tuned'** profile for your system and set it as the default.
