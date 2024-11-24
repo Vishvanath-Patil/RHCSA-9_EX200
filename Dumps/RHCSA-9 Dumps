@@ -1,0 +1,44 @@
+# RHCSA v9 Exam Questions and Instructions
+
+This document provides a comprehensive guide to RHCSA v9 exam tasks, including configuration and troubleshooting for two VMs:  
+- `node1.domainX.example.com` (IP: 172.24.10.10)  
+- `node2.domainX.example.com` (IP: 172.24.10.11)
+
+## Important Notes:
+1. **Total Questions:** Approximately 22.
+2. **VM Setup:**
+   - One VM (`node2`) requires root password recovery.
+   - Network, NTP, YUM, and other configurations are to be set up as per the instructions below.
+3. **Prerequisites:**
+   - SELinux and Firewall are enabled by default.
+   - YUM repositories and other configurations must be implemented as described.
+
+---
+
+## Tasks for `node1`
+
+### Q1: Configure Network with Static Parameters
+**Parameters:**
+- IP Address: `172.24.10.10`
+- Netmask: `255.255.255.0`
+- Gateway: `172.24.10.254`
+- Nameserver: `172.24.10.254`
+- Domain Name: `domainX.example.com`
+- Hostname: `node1.domainX.example.com`
+
+**Steps:**
+```bash
+ip a s
+nmcli connection modify "Wired connection 1" \
+    ipv4.address "172.24.10.10/24" \
+    ipv4.dns "172.24.10.254" \
+    ipv4.gateway "172.24.10.254" \
+    ipv4.method manual
+nmcli connection reload
+hostnamectl set-hostname node1.domainX.example.com
+
+Q2: Configure YUM Repositories
+Repositories:
+
+BaseOS: http://content.example.com/rhel8.0/x86_64/dvd/BaseOS/
+AppStream: http://content.example.com/rhel8.0/x86_64/dvd/AppStream/
