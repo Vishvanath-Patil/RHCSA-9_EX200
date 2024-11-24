@@ -1,4 +1,4 @@
-# RHCSA 9v EX200 Repository
+# RHCSA 9v EX200 Exam Prepration.
 
 ## Overview
 This repository is a comprehensive resource for individuals preparing for the **Red Hat Certified System Administrator (RHCSA) 9v EX200** exam. It contains the latest exam dumps, lab handbooks, and solved exercises to help you master the skills required for certification.
