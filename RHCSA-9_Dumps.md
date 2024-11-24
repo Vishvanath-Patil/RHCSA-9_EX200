@@ -44,12 +44,9 @@ vim /etc/ssh/sshd_config
 # 66 PasswordAuthentication yes
 :wq
 systemctl restart sshd.service
-
 Q2: Configure YUM Repositories
-Configure the repositories for BaseOS and AppStream:
+Configure the repositories for BaseOS and AppStream.
 
-BaseOS URL: http://content.example.com/rhel8.0/x86_64/dvd/BaseOS
-AppStream URL: http://content.example.com/rhel8.0/x86_64/dvd/AppStream
 bash
 Copy code
 vim /etc/yum.repos.d/rhel.repo
@@ -67,8 +64,8 @@ vim /etc/yum.repos.d/rhel.repo
 :wq
 yum list autofs
 Q3: Debug SELinux for a Web Server
-A web server runs on port 82.
-Ensure SELinux allows this configuration.
+Ensure SELinux allows the web server to run on port 82.
+
 bash
 Copy code
 yum list httpd
@@ -82,11 +79,8 @@ firewall-cmd --list-all
 semanage port -a -t http_port_t -p tcp 82
 curl localhost:82/file1
 Q4: Create User Accounts
-Create group: sysadms.
-Create users:
-natasha and harry in sysadms.
-sarah with a non-interactive shell, not in sysadms.
-Password for all users: trootent.
+Create a sysadms group and add users natasha, harry, and sarah.
+
 bash
 Copy code
 groupadd sysadms
@@ -97,7 +91,7 @@ echo "trootent" | passwd --stdin harry
 echo "trootent" | passwd --stdin natasha
 echo "trootent" | passwd --stdin sarah
 Q5: Configure Cron Job
-Create a cron job for user natasha that logs "EX200 in progress" every 2 minutes.
+Create a cron job for natasha that logs "EX200 in progress" every 2 minutes.
 
 bash
 Copy code
@@ -107,9 +101,8 @@ crontab -eu natasha
 :wq
 systemctl restart crond.service
 Q6: Create Collaborative Directory
-Create /home/manager.
-Set group ownership to sysadms.
-Set full permissions for sysadms and no access for others except root.
+Create /home/manager directory, set group ownership to sysadms, and set permissions.
+
 bash
 Copy code
 mkdir /home/sysadms
@@ -153,57 +146,56 @@ bash
 Copy code
 podman run -d --name ascii2pdf -v /opt/files:/opt/incoming:Z -v /opt/processed:/opt/outgoing:Z localhost/monitor
 podman generate systemd --name ascii2pdf --files --new
+node2
+Q11: Configure NFS Share
+Configure NFS to share the /data directory with client node3 at IP 192.168.1.3.
 
-# RHCSA v9 Practice Questions
-
-## **node2**
-
-### **Q11. Configure NFS Share**
-- Configure NFS to share the `/data` directory with the client system `node3` at the IP address `192.168.1.3`.
-
-```bash
-# mkdir -p /data
-# chmod 777 /data
-# vim /etc/exports
+bash
+Copy code
+mkdir -p /data
+chmod 777 /data
+vim /etc/exports
 /data 192.168.1.3(rw,sync,no_root_squash)
 :wq!
-# exportfs -a
-# systemctl start nfs-server
-# systemctl enable nfs-server
-# firewall-cmd --permanent --add-service=nfs
-# firewall-cmd --reload
-Q13. Configure Apache Web Server
-Install and configure the Apache HTTPD service.
-Ensure the web server is serving the default page and accessible from node3.
+exportfs -a
+systemctl start nfs-server
+systemctl enable nfs-server
+firewall-cmd --permanent --add-service=nfs
+firewall-cmd --reload
+Q13: Configure Apache Web Server
+Install and configure Apache HTTPD service. Ensure the web server serves the default page and is accessible from node3.
+
 bash
 Copy code
-# yum install -y httpd
-# systemctl start httpd
-# systemctl enable httpd
-# firewall-cmd --permanent --add-service=http
-# firewall-cmd --reload
-# echo "Welcome to RHCSA Web Server" > /var/www/html/index.html
-# systemctl status httpd
-Q14. Configure SELinux Context for a Directory
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+firewall-cmd --permanent --add-service=http
+firewall-cmd --reload
+echo "Welcome to RHCSA Web Server" > /var/www/html/index.html
+systemctl status httpd
+Q14: Configure SELinux Context for a Directory
 Ensure the /data directory on node2 is labeled with the correct SELinux context for a web server directory (httpd_sys_content_t).
+
 bash
 Copy code
-# semanage fcontext -a -t httpd_sys_content_t "/data(/.*)?"
-# restorecon -Rv /data
-# ls -Z /data
-Q15. Reset root user password and make it trootent.
+semanage fcontext -a -t httpd_sys_content_t "/data(/.*)?"
+restorecon -Rv /data
+ls -Z /data
+Q15: Reset Root User Password
+Reset the root password to trootent.
+
 bash
 Copy code
-# passwd root
+passwd root
 New password: trootent
 Retype new password: trootent
-Q16. Configure YUM Repos
-Configure the following YUM repositories:
-BaseOS: http://content.example.com/rhel8.0/x86_64/dvd/BaseOS
-AppStream: http://content.example.com/rhel8.0/x86_64/dvd/AppStream
+Q16: Configure YUM Repos
+Configure BaseOS and AppStream YUM repositories.
+
 bash
 Copy code
-# vim /etc/yum.repos.d/rhel.repo
+vim /etc/yum.repos.d/rhel.repo
 [BaseOS]
 name=BaseOS
 baseurl=http://content.example.com/rhel8.0/x86_64/dvd/BaseOS/
@@ -216,22 +208,24 @@ baseurl=http://content.example.com/rhel8.0/x86_64/dvd/AppStream/
 gpgcheck=0
 enabled=1
 :wq!
-# yum list autofs
-Q17. Resize a Logical Volume
-Resize the logical volume mylv so that after reboot, the size is between 290MB and 330MB.
+yum list autofs
+Q17: Resize a Logical Volume
+Resize the logical volume mylv to a size between 290MB and 330MB.
+
 bash
 Copy code
-# lvs
-# df -hT
-# lvextend -L 310M /dev/myvg/mylv
-# resize2fs /dev/mapper/myvg-mylv
-# lvs
-# df -hT
-Q18. Add a Swap Partition
+lvs
+df -hT
+lvextend -L 310M /dev/myvg/mylv
+resize2fs /dev/mapper/myvg-mylv
+lvs
+df -hT
+Q18: Add a Swap Partition
 Add a 512MB swap partition and ensure it is mounted permanently.
+
 bash
 Copy code
-# gdisk /dev/vdb
+gdisk /dev/vdb
 Command (? for help): n
 Partition number (2-128, default 2):
 First sector (34-2047, default = 34) or {+-}size{KMGTP}: Press Enter
@@ -245,23 +239,24 @@ Hex code or GUID (L to show codes, Enter = 8300): 8200
 Changed type of partition to 'Linux swap'
 
 Command (? for help): w
-# udevadm settle
-# reboot
-# lsblk
-# mkswap /dev/vdb2
-# vim /etc/fstab
+udevadm settle
+reboot
+lsblk
+mkswap /dev/vdb2
+vim /etc/fstab
 UUID=e5a95dd4-0417-4229-a499-92b29fe9f201 swap swap defaults 0 0
 :wq!
-# mount -a
-# swapon /dev/vdb2
-# swapon -s
-# swapon -d
-# free -m
-Q19. Create a Logical Volume
-Create a logical volume named newlv from the volume group newvg with physical extents of 16MB and logical volume size of 50 extents.
+mount -a
+swapon /dev/vdb2
+swapon -s
+swapon -d
+free -m
+Q19: Create a Logical Volume
+Create a logical volume named newlv from the volume group newvg.
+
 bash
 Copy code
-# gdisk /dev/vdb
+gdisk /dev/vdb
 Command (? for help): n
 Partition number (3-128, default 3): 3
 First sector (34-2047, default = 34) or {+-}size{KMGTP}: Press Enter
@@ -275,28 +270,29 @@ Hex code or GUID (L to show codes, Enter = 8300): 8e00
 Changed type of partition to 'Linux lvm'
 
 Command (? for help): w
-# udevadm settle
-# pvcreate /dev/vdb3
-# vgcreate -s 16M newvg /dev/vdb3
-# vgdisplay
-# lvcreate -n newlv -l 50 newvg
-# lvs
-# mkfs -t ext3 /dev/mapper/newvg-newlv
-# blkid
-# mkdir /mnt/newlv
-# echo "UUID=1902-BFCE /mnt/newlv ext3 defaults 0 0" >> /etc/fstab
-# mount -a
-# df -hT
-Q20. Configure System Tuning
+udevadm settle
+pvcreate /dev/vdb3
+vgcreate -s 16M newvg /dev/vdb3
+vgdisplay
+lvcreate -n newlv -l 50 newvg
+lvs
+mkfs -t ext3 /dev/mapper/newvg-newlv
+blkid
+mkdir /mnt/newlv
+echo "UUID=1902-BFCE /mnt/newlv ext3 defaults 0 0" >> /etc/fstab
+mount -a
+df -hT
+Q20: Configure System Tuning
 Choose the recommended tuned profile for the system and set it as the default.
+
 bash
 Copy code
-# yum list tuned
-# systemctl restart tuned.service
-# tuned-adm active
+yum list tuned
+systemctl restart tuned.service
+tuned-adm active
 Current active profile: balanced
-# tuned-adm recommend
+tuned-adm recommend
 virtual-guest
-# tuned-adm profile virtual-guest
-# tuned-adm active
+tuned-adm profile virtual-guest
+tuned-adm active
 Current active profile: virtual-guest
