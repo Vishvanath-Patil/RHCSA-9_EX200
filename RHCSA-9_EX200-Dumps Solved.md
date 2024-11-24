@@ -353,3 +353,378 @@ Output:
 210 Number of sources = 1
 .utility.example.com           1   2   3    3   0.234   0.002   0.002
 ```
+## Q8. Configure AutoFS
+
+### Task Description:
+- All `remoteuserX` home directories should be exported via NFS, which is available on `utility.example.com` (IP: 172.24.10.100).
+- Your NFS exports directory is `/home/remoteuserX` for each `remoteuserX`.
+- `remoteuserX`'s home directory should be automatically mounted using the AutoFS service.
+- Home directories must be writable by their respective users.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Verify the existence of `remoteuserX`
+getent passwd remoteuserX
+
+# Step 2: Install AutoFS package
+yum install autofs.x86_64 -y
+
+# Step 3: Enable and start the AutoFS service
+systemctl enable autofs.service
+systemctl start autofs.service
+
+# Step 4: Configure AutoFS in the `auto.master` file
+vim /etc/auto.master
+
+# Add the following entry:
+/rhome/remoteuserX /etc/auto.misc
+
+:wq!
+
+# Step 5: Configure AutoFS in the `auto.misc` file
+vim /etc/auto.misc
+
+# Add the following line:
+remoteuserX -fstype=rw,nfs,soft,sync utility.example.com:/rhome/remoteuserX
+
+:wq!
+
+# Step 6: Restart the AutoFS service
+systemctl restart autofs.service
+
+# Verification:
+# Switch to the `remoteuserX` account
+su - remoteuserX
+
+# Verify the mount point
+pwd
+
+# Should show:
+/rhome/remoteuserX
+
+# Test if the home directory is writable by creating a new file
+$ touch file1.txt
+```
+```bash
+su - remoteuserX
+pwd
+# Output should be:
+/rhome/remoteuserX
+
+Test by creating a new file:
+$ touch file1.txt
+```
+---
+```bash
+Explanation:
+Verify the existence of remoteuserX:
+
+The getent passwd remoteuserX command checks if the user remoteuserX exists on the system.
+Install AutoFS:
+
+The yum install autofs.x86_64 -y command installs the AutoFS service, which will help in automatically mounting remote home directories when accessed.
+Enable and start AutoFS:
+
+The systemctl enable autofs.service ensures that the AutoFS service starts automatically at boot, and the systemctl start autofs.service starts the service immediately.
+Configure AutoFS in auto.master:
+
+The entry /rhome/remoteuserX /etc/auto.misc in the auto.master file tells AutoFS to use the /etc/auto.misc configuration file when mounting directories for remoteuserX.
+Configure AutoFS in auto.misc:
+
+The line remoteuserX -fstype=rw,nfs,soft,sync utility.example.com:/rhome/remoteuserX in the auto.misc file specifies the properties for mounting the remote user home directories over NFS.
+Restart the AutoFS service:
+
+Restarting the AutoFS service applies the new configurations.
+Expected Outputs:
+After Step 5, verify if the user home directory is mounted properly:
+```
+---
+## Q9. Create a Container Image from the Provided Link
+
+### Task Description:
+- Create a container image from the **`Containerfile`** available at the link `http://utility.example.com/container/Containerfile`, and name the image as **`process_files`**.
+- Login to the registry at `registry.lab.example.com` using the username **`admin`** and password **`redhat321`** (credentials available from the additional info page).
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Check the current user ID for athena
+id athena
+
+# Step 2: SSH into athena@localhost
+ssh athena@localhost
+
+# Step 3: Login to the container registry using podman
+$ podman login -u admin
+$ password: redhat321
+
+# Step 4: Download the Containerfile from the provided link
+$ wget http://utility.example.com/container/Containerfile
+
+# Step 5: Build the container image using podman
+$ podman build -t process_files -f .
+
+# Step 6: List the images to verify the image creation
+$ podman images
+# Output should show: 
+# localhost/process_files
+
+# Step 7: Exit the SSH session
+$ exit
+```
+---
+```bash
+Expected Outputs:
+After Step 6, when you run podman images, the output should look like:
+plaintext
+Copy code
+REPOSITORY                TAG     IMAGE ID       CREATED         SIZE
+localhost/process_files    latest  <image_id>     <timestamp>     <size>
+```
+###Explanation:
+- id athena: The id command is used to check the user details for athena. This ensures that the user exists and the permissions are set correctly before proceeding.
+- ssh athena@localhost: You SSH into the athena user account on the local machine to perform the necessary steps for building the container image.
+- podman login -u admin: This command logs you into the container registry using the provided username (admin) and password (redhat321).
+- wget http://utility.example.com/container/Containerfile: Downloads the Containerfile from the specified URL to the local machine.
+- podman build -t process_files -f .: Builds the container image using the Containerfile and tags it as process_files.
+- podman images: This command lists the local container images. You should see the newly created image localhost/process_files.
+- exit: Exits the SSH session after completing the task.
+---
+## Q10. Create Rootless Container and Do Volume Mapping
+
+## Task Description:
+1. **Create a container named `ascii2pdf`** using the previously created container image `monitor`.
+2. **Map** the local directories `/opt/files` and `/opt/processed` to the container directories `/opt/incoming` and `/opt/outgoing` respectively.
+3. **Create a systemd service** called `container-ascii2pdf.service` to manage the container as a service.
+4. **Enable the service** so it starts automatically after a reboot.
+  
+---
+
+### Steps:
+
+```bash
+# Step 1: Create and set up the local directories
+mkdir /opt/files
+chown -R athena:athena /opt/files
+
+mkdir /opt/processed
+chown -R athena:athena /opt/processed
+
+# Step 2: SSH into athena user account
+ssh athena@localhost
+
+# Step 3: Run the container with volume mapping
+$ podman run -d --name ascii2pdf -v /opt/files:/opt/incoming:Z -v /opt/processed:/opt/outgoing:Z localhost/monitor
+
+# Step 4: Verify that the container is running
+$ podman ps
+
+# Step 5: Create the systemd user directory if not already present
+$ mkdir -p /home/athena/.config/systemd/user/
+
+# Step 6: Generate the systemd service for the container
+$ cd /home/athena/.config/systemd/user/
+$ podman generate systemd --name ascii2pdf --files --new
+
+# Step 7: Verify the generated systemd service file
+$ ls -lrt
+# Output should show:
+# container-ascii2pdf.service
+
+# Step 8: Reload systemd user services
+$ systemctl --user daemon-reload
+
+# Step 9: Enable the systemd service to start on boot
+$ systemctl --user enable container-ascii2pdf.service
+
+# Step 10: Start the systemd service
+$ systemctl --user start container-ascii2pdf.service
+
+# Step 11: Enable lingering for the athena user to allow the service to run after logout
+$ loginctl enable-linger athena
+
+# Step 12: Verify user lingering is enabled
+$ loginctl show-user athena
+
+# Step 13: Verify the status of the service
+$ systemctl --user stop container-ascii2pdf.service
+$ podman ps
+$ systemctl --user start container-ascii2pdf.service
+$ podman ps
+```
+---
+```bash
+Expected Outputs:
+After Step 4 (podman ps):
+
+CONTAINER ID   IMAGE                         COMMAND               CREATED         STATUS         PORTS   NAMES
+<container_id> localhost/monitor              <command>             <timestamp>     Up <time>               ascii2pdf
+After Step 12 (loginctl show-user athena):
+```
+```bash
+User=athena
+Linger=yes
+After Step 13 (podman ps):
+
+
+CONTAINER ID   IMAGE                         COMMAND               CREATED         STATUS         PORTS   NAMES
+<container_id> localhost/monitor              <command>             <timestamp>     Up <time>               ascii2pdf
+```
+### Explanation:
+### Creating and setting up local directories:
+
+- /opt/files and /opt/processed are created and ownership is set to the athena user. These directories will be mapped to the container’s incoming and outgoing directories respectively.
+Running the container with volume mapping:
+
+- The podman run command starts the ascii2pdf container with volume mappings (/opt/files:/opt/incoming and /opt/processed:/opt/outgoing). The :Z flag ensures that SELinux contexts are applied correctly.
+Generating a systemd service for the container:
+
+- The podman generate systemd command generates a systemd service unit file for the container, which will manage the container lifecycle using systemctl.
+Enabling and starting the systemd service:
+
+- The service is enabled using systemctl --user enable to ensure it starts on boot. It is then started using systemctl --user start.
+Enabling lingering for the athena user:
+
+- The loginctl enable-linger athena command allows the athena user to have persistent services that continue running after they log out.
+Verification:
+
+- After the service is started, systemctl --user stop and systemctl --user start verify that the service can be stopped and started successfully, while podman ps ensures the container is running.
+---
+## Q11. Create User 'alex' with UID 3456 and Set the Password 'trootent'
+
+## Task Description:
+- Create a user **`alex`** with the UID **3456**.
+- Set the password for **`alex`** to **`trootent`**.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Create the user 'alex' with UID 3456
+useradd -u 3456 alex
+
+# Step 2: Set the password for 'alex'
+echo "trootent" | passwd --stdin alex
+
+# Step 3: Verify the user creation and UID
+id alex
+Output: uid=3456(alex) gid=3456(alex) groups=3456(alex)
+```
+## Q12. Locate All Files Owned by User "harry" and Copy Them Under /root/harry-files
+
+## Task Description:
+- Locate all files owned by user **`harry`** and copy them to the directory **`/root/harry-files`**.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Create the target directory for storing files
+mkdir /root/harry-files
+
+# Step 2: Find all files owned by user 'harry' and copy them to /root/harry-files
+find / -user harry -exec cp -rvfp {} /root/harry-files \;
+
+# Step 3: Verify the files copied
+ls -a /root/harry-files
+```
+## Q13. Find a String 'ich' from "/usr/share/dict/words" and Put It into /root/lines File
+
+## Task Description:
+- Search for the string **`ich`** in the file **`/usr/share/dict/words`** and store the matching lines in the file **`/root/lines`**.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Search for the string 'ich' in /usr/share/dict/words and save the result to /root/lines
+grep "ich" /usr/share/dict/words > /root/lines
+
+# Step 2: View the contents of /root/lines
+cat /root/lines
+```
+## Q14. Create an Archive '/root/backup.tar.bz2' of /usr/local Directory and Compress It with bzip2
+
+### Task Description:
+- Create a compressed archive of the **`/usr/local`** directory and save it as **`/root/backup.tar.bz2`** using **bzip2** compression.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Install bzip2 if not already installed
+yum install bzip2.x86_64 -y
+
+# Step 2: Create a compressed tar archive of /usr/local
+tar cfvj /root/backup.tar.bz2 /usr/local
+```
+---
+### Explanation:
+- yum install bzip2.x86_64 -y: Installs the bzip2 package, which is required for compression.
+- tar cfvj /root/backup.tar.bz2 /usr/local: The tar command creates a .tar.bz2 archive:
+- c – Create a new archive.
+- f – Specifies the file name for the archive.
+- v – Verbose output (optional, for displaying files being archived).
+- j – Use bzip2 compression.
+- The resulting archive will be stored at /root/backup.tar.bz2.
+
+#### Expected Output:
+- After running the tar command, a /root/backup.tar.bz2 file will be created containing the /usr/local directory.
+---
+
+## Q15. Script to Store Search Result of Files in /usr/share Directory Greater Than 30k and Less Than 50k in /mnt/freespace/search.txt File
+
+### Task Description:
+- Write a script that searches for all files in the **`/usr/share`** directory that are greater than 30k and less than 50k in size, and stores the search results in **`/mnt/freespace/search.txt`**.
+
+---
+
+## Steps:
+
+```bash
+# Step 1: Create a new script file
+vim test.sh
+
+# Step 2: Write the script
+#!/bin/bash
+find /usr/share/ -uid 0 -size +30k -size -50k >/mnt/freespace/search.txt
+
+# Step 3: Save and exit the editor (:wq!)
+
+# Step 4: Make the script executable
+chmod +x test.sh
+
+# Step 5: Run the script
+bash test.sh
+
+# Step 6: Check the content of the search results
+cat /mnt/freespace/search.txt
+```
+---
+### Explanation:
+- vim test.sh: Opens the vim editor to create a new script file called test.sh.
+- #!/bin/bash: This shebang line ensures that the script runs with the Bash shell.
+- find /usr/share/ -uid 0 -size +30k -size -50k >/mnt/freespace/search.txt: The find command searches for files in the /usr/share directory that are:
+- Owned by root (-uid 0).
+- Between 30k and 50k in size (-size +30k -size -50k).
+- The results are redirected to /mnt/freespace/search.txt.
+- chmod +x test.sh: Makes the script executable.
+- bash test.sh: Executes the script.
+- cat /mnt/freespace/search.txt: Displays the contents of the search.txt file, showing the list of matching files.
+#### Expected Output:
+- After running cat /mnt/freespace/search.txt, the output will display the list of files in /usr/share that are greater than 30k and less than 50k in size.
+---
+
+
+
+
+
