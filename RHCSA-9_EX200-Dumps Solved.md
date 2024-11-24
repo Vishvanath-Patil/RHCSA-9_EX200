@@ -723,8 +723,365 @@ cat /mnt/freespace/search.txt
 #### Expected Output:
 - After running cat /mnt/freespace/search.txt, the output will display the list of files in /usr/share that are greater than 30k and less than 50k in size.
 ---
+# Node 2 Questions
+## Q16. Reset root user password and make it 'trootent'
 
+### Steps:
 
+#### 1. Reboot the System
+- Press **Ctrl + Alt + Del** to reboot the system.
 
+#### 2. Select Rescue Mode
+- When the GRUB menu appears:
+  - Select **Rescue Mode** or **Troubleshooting Mode**.
+- If **Rescue Mode** is not visible:
+  - Highlight the default boot entry and press **`e`** to edit boot parameters.
 
+#### 3. Modify Kernel Parameters
+- Locate the line starting with `linux` or `linux16`.
+- Add the following at the end of the line:
+  ```bash
+  rd.break
+- Press Ctrl + X or F10 to boot into the rescue shell.
+#### 4. Remount Root Filesystem
+- In the rescue shell, remount the root filesystem in read-write mode:
+```bash
+mount -o remount,rw /sysroot
+```
+#### 5. Access the Root Filesystem
+- Change into the root filesystem:
+```bash
+chroot /sysroot
+```
+#### 6. Reset the Root Password
+- Set the new root password:
+```bash
+passwd
+```
+When prompted, set the password as trootent.
+#### 8. Trigger SELinux Relabeling
+- Create a file to trigger SELinux relabeling during the next boot:
 
+```bash
+touch /.autorelabel
+```
+#### 8. Exit and Reboot
+- Exit the chroot environment:
+```bash
+exit
+```
+- Exit the rescue shell:
+```bash
+exit
+```
+- The system will reboot, and SELinux will relabel the filesystem.
+---
+#### 9. Verify Root Access
+- After rebooting, log in as the root user using the new password:
+Username: root
+Password: trootent
+
+### Important Notes:
+### SELinux Relabeling:
+- The relabeling process may take some time, depending on the size of your filesystem.
+## Troubleshooting Mode:
+- If a dedicated "Rescue" option is not visible, appending rd.break to the default boot entry achieves the same result.
+---
+## **Q17 Configure YUM repos with the given link (2 repos: 1st is BaseOS and 2nd is AppStream)**.
+- **BaseOS**: `http://content.example.com/rhel9.0/x86_64/dvd/BaseOS`
+- **AppStream**: `http://content.example.com/rhel9.0/x86_64/dvd/AppStream`
+
+## Answer:
+
+### Step 1: Edit the YUM Repository Configuration File
+Run the following command to create or edit the repository configuration file:
+
+```bash
+# vim /etc/yum.repos.d/rhel.repo
+```
+Insert the following content into the file:
+```bash
+[BaseOS]
+name=BaseOS
+baseurl=http://content.example.com/rhel8.0/x86_64/dvd/BaseOS/
+gpgcheck=0
+enabled=1
+
+[AppStream]
+name=AppStream
+baseurl=http://content.example.com/rhel8.0/x86_64/dvd/AppStream/
+gpgcheck=0
+enabled=1
+```
+- Save and exit the file by typing :wq then
+- Verify Configuration
+```bash
+# yum list autofs
+```
+---
+## Q18. Resize a Logical Volume
+
+### Task Description:
+Resize the logical volume **"mylv"** so that after reboot, its size should be between **290MB** and **330MB**.
+
+### Steps:
+
+#### 1. Check the Current Logical Volumes
+- List all logical volumes:
+  ```bash
+  lvs
+  ```
+#### 2. Check the Filesystem Usage
+- Display disk usage and filesystem type:
+```bash
+df -hT
+```
+#### 3. Resize the Logical Volume
+- Use lvextend to resize the logical volume "mylv" to 310MB:
+```bash
+lvextend -L 310M /dev/myvg/mylv
+```
+#### 4. Resize the Filesystem
+- After resizing the logical volume, resize the filesystem to match the new size:
+```bash
+resize2fs /dev/mapper/myvg-mylv
+```
+#### 5. Verify the Logical Volume Size
+- Check the logical volumes again to verify the new size:
+```bash
+lvs
+```
+#### 6. Verify Disk Usage
+- Verify the disk usage and the updated filesystem size:
+```bash
+df -hT
+```
+---
+## Q18. Add a Swap Partition of 512MB and Mount it Permanently
+
+### Task Description:
+Add a swap partition of **512MB** and mount it permanently.
+
+### Steps:
+
+#### 1. Create the Swap Partition
+- Use `gdisk` to create a new partition on `/dev/vdb`:
+  ```bash
+  gdisk /dev/vdb
+  ```
+- Command (? for help): n to create a new partition
+- Partition number (2-128, default 2): Press Enter
+- First sector (34-2047, default = 34) or {+-}size{KMGTP}: Press Enter
+- Last sector (34-2047, default = 2047) or {+-}size{KMGTP}: +512M
+- Hex code or GUID (L to show codes, Enter = 8300): Press Enter
+#### 2. Set the Partition Type to Swap
+- Change the partition type to Linux swap:
+```bash
+Command (? for help): t
+Partition number (1-2): 2
+Current type is 8300 (Linux filesystem)
+Hex code or GUID (L to show codes, Enter = 8300): 8200
+```
+- Save and write the changes:
+Command (? for help): w
+#### 3. Settle Udev Rules and Reboot
+- Settle udev changes:
+```bash
+udevadm settle
+```
+- Reboot the system to apply changes:
+```bash
+reboot
+```
+#### 4. Verify the Partition
+- Verify the new partition using lsblk:
+```bash
+lsblk
+```
+#### 5. Create Swap Space
+- Format the newly created partition as swap:
+```bash
+mkswap /dev/vdb2
+```
+#### 6. Get the UUID of the Swap Partition
+- Copy the UUID of the swap partition:
+```bash
+blkid /dev/vdb2
+Example output:
+UUID="e5a95dd4-0417-4229-a499-92b29fe9f201"
+```
+7. Edit /etc/fstab for Permanent Mount
+- Open /etc/fstab in a text editor:
+```bash
+vim /etc/fstab
+```
+- Add the following line to automatically mount the swap partition on boot:
+```bash
+UUID=e5a95dd4-0417-4229-a499-92b29fe9f201 swap swap defaults 0 0
+```
+- Save and exit the editor (:wq!).
+#### 8. Mount All Filesystems
+- Mount all filesystems defined in /etc/fstab:
+```bash
+mount -a
+```
+#### 9. Enable Swap
+- Activate the swap partition:
+```bash
+swapon /dev/vdb2
+```
+#### 10. Verify the Swap
+- Verify swap is active:
+```bash
+swapon -s
+```
+- Alternatively, you can use:
+```bash
+swapon -d
+```
+#### 11. Check Memory Usage
+Check the system's memory usage including swap:
+```bash
+free -m
+```
+---
+## Q19. Create a Logical Volume of Name "newlv" from a Volume Group Name "newvg"
+
+### Task Description:
+Create a logical volume named **"newlv"** from a volume group named **"newvg"** with physical extents of **16M** and the logical volume size of **50 extents**.
+
+### Steps:
+
+#### 1. Create a New Partition for LVM
+- Use `gdisk` to create a new partition on `/dev/vdb`:
+  ```bash
+  gdisk /dev/vdb
+  ```
+- Command (? for help): n to create a new partition
+- Partition number (3-128, default 3): 3
+- First sector (34-2047, default = 34) or {+-}size{KMGTP}: Press Enter
+- Last sector (34-2047, default = 2047) or {+-}size{KMGTP}: +1024M
+- Hex code or GUID (L to show codes, Enter = 8300): Press Enter
+#### 2. Set the Partition Type to Linux LVM
+- Change the partition type to Linux LVM (code: 8e00):
+```bash
+Command (? for help): t
+Partition number (1-3): `3`
+Current type is 8300 (Linux filesystem)
+Hex code or GUID (L to show codes, Enter = 8300): `8e00`
+```
+- Save the partition table:
+```bash
+Command (? for help): w
+```
+#### 3. Settle Udev Rules
+Settle udev changes:
+```bash
+udevadm settle
+```
+#### 4. Create Physical Volume (PV)
+- Create the physical volume using /dev/vdb3:
+```bash
+pvcreate /dev/vdb3
+```
+#### 5. Create Volume Group (VG)
+- Create the volume group newvg with a physical extent size of 16M:
+```bash
+vgcreate -s 16M newvg /dev/vdb3
+```
+#### 6. Verify Volume Group
+- Verify the volume group creation:
+```bash
+vgdisplay
+```
+#### 7. Create Logical Volume (LV)
+- Create a logical volume named newlv with a size of 50 extents:
+```bash
+lvcreate -n newlv -l 50 newvg
+```
+#### 8. Verify Logical Volume
+- Verify the creation of the logical volume:
+```bash
+lvs
+```
+#### 9. Format the Logical Volume
+- Format the logical volume with the ext3 filesystem:
+```bash
+mkfs -t ext3 /dev/mapper/newvg-newlv
+```
+#### 10. Get UUID of the Logical Volume
+- Get the UUID of the new logical volume:
+```bash
+blkid
+```
+#### 11. Create Mount Point
+- Create a directory to mount the new logical volume:
+```bash
+mkdir /mnt/newlv
+```
+#### 12. Edit /etc/fstab for Permanent Mount
+- Open /etc/fstab in a text editor:
+```bash
+vim /etc/fstab
+```
+- Add the following line to /etc/fstab to mount the logical volume automatically on boot:
+```bash
+UUID=<UUID-of-newlv> /mnt/newlv ext3 defaults 0 0
+Replace <UUID-of-newlv> with the actual UUID obtained from blkid.
+Save and exit the editor (:wq!).
+```
+#### 13. Mount All Filesystems
+- Mount all filesystems defined in /etc/fstab:
+```bash
+mount -a
+```
+#### 14. Verify Mount
+Verify that the new logical volume is mounted:
+```bash
+df -hT
+```
+## Q20. Configure System Tuning
+
+### Task Description:
+Choose the recommended **'tuned'** profile for your system and set it as the default.
+
+### Steps:
+
+#### 1. List Available Tuned Packages
+- Use the following command to list the available tuned packages:
+  ```bash
+  yum list tuned
+  ```
+#### 2. Restart the Tuned Service
+- Restart the tuned service to ensure the latest changes take effect:
+```bash
+systemctl restart tuned.service
+```
+#### 3. Check the Current Active Profile
+- Check the current active profile:
+```bash
+tuned-adm active
+Output:
+sql
+Copy code
+Current active profile: balanced
+```
+#### 4. Get the Recommended Profile
+- Get the recommended profile for your system:
+```bash
+tuned-adm recommend
+#Output:
+virtual-guest
+```
+#### 5. Set the Virtual-Guest Profile as Active
+- Set the virtual-guest profile as the active profile:
+```bash
+tuned-adm profile virtual-guest
+```
+#### 6. Verify the Active Profile
+- Verify that the virtual-guest profile is now active:
+```bash
+tuned-adm active
+Output:
+- Current active profile: virtual-guest
+```
