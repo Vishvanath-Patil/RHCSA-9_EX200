@@ -336,12 +336,11 @@ timedatectl
 # Step 8: Check the NTP sources
 chronyc sources -v
 ```
----
-Expected Outputs:
-After Step 7 (timedatectl):
-
-plaintext
-Copy code
+```bash
+#Expected Outputs:
+#After Step 7
+timedatectl
+Output:
 Local time: <current_time>
 Universal time: <current_utc_time>
 RTC time: <rtc_time>
@@ -349,7 +348,8 @@ Time zone: <timezone>
 NTP synchronized: yes
 NTP service: active
 
-After Step 8 (chronyc sources -v):
+#After Step 8 (chronyc sources -v):
+Output:
 210 Number of sources = 1
 .utility.example.com           1   2   3    3   0.234   0.002   0.002
----
+```
