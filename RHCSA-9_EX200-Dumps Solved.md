@@ -308,7 +308,7 @@ ls -l /home/manager/file1.txt
 # Output:
 # -rw-r--r-- 1 root sysadms 0 <date> /home/manager/file1.txt
 ```
-# Q7. Configure NTP - Synchronize time of your system with the server 'utility.example.com'
+## Q7. Configure NTP - Synchronize time of your system with the server 'utility.example.com'
 
 ## Steps:
 
