@@ -91,6 +91,7 @@ Configure `node1` with static network parameters, update the hostname, and enabl
 ```bash
 nmcli connection modify ens160 ipv4.addresses 192.168.245.50/24
 nmcli connection modify ens160 ipv4.gateway 192.168.245.1
+nmcli connection modify ens160 ipv4.dns-search "domainX.example.com"
 nmcli connection modify ens160 ipv4.dns "8.8.8.8 8.8.4.4"
 nmcli connection modify ens160 ipv4.method manual
 nmcli connection reload
