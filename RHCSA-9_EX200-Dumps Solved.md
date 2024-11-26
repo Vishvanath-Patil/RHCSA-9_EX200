@@ -194,7 +194,11 @@ cat /etc/httpd/conf/httpd.conf | grep -i "listen"
 Allow port 82 through the firewall:
 ```bash
 firewall-cmd --permanent --add-port=82/tcp
+firewall-cmd --permanent --add-service=http
 firewall-cmd --reload
+firewall-cmd --list-all
+vim /etc/httpd/conf/httpd.conf
+Change --> Listen 80 to 82 port
 ```
 Check SELinux settings for allowed HTTP ports:
 ```bash
@@ -211,6 +215,10 @@ Verify SELinux settings for port 82:
 semanage port -l | grep "http"
 #Ouput:
  http_port_t tcp 82, 80, 81, 443, 488, 8008, 8009, 8443, 9000
+```
+To Apply the Changes don't forget restart the service
+```bash
+systectl restart httpd
 ```
 Test the server:
 ```bash
