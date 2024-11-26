@@ -208,7 +208,7 @@ semanage port -l | grep "http"
 ```
 Add port 82 to SELinux's allowed ports:
 ```bash
-semanage port -a -t httpd_port_t -p tcp 82
+semanage port -a -t http_port_t -p tcp 82
 ```
 Verify SELinux settings for port 82:
 ```bash
