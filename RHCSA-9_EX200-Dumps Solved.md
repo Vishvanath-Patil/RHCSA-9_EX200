@@ -97,7 +97,9 @@ nmcli connection modify ens160 ipv4.method manual
 nmcli connection reload
 nmcli connection up ens160
 nmcli connection show ens160
-To Set back to DHCP --> nmcli connection modify ens160 ipv4.method auto
+# Verify the domain name in the resolv.conf
+cat /etc/resolv.conf
+#To Set back to DHCP --> nmcli connection modify ens160 ipv4.method auto
 ```
 Hostname Configuration
 Verify and set the hostname:
