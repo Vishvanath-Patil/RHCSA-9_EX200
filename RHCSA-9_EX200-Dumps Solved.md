@@ -107,6 +107,8 @@ Verify and set the hostname:
 # hostname
 # hostnamectl set-hostname node1.domainX.example.com
 ```
+
+
 SSH Configuration
 Edit the SSH configuration file:
 
