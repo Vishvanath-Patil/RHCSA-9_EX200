@@ -309,6 +309,8 @@ mkdir /home/manager
 
 # Step 2: Change the group ownership to "sysadms"
 chgrp sysadms /home/manager
+OR
+chown :sysadms /home/manager
 
 # Step 3: Verify the group ownership
 ls -ld /home/manager
@@ -317,7 +319,9 @@ ls -ld /home/manager
 
 # Step 4: Set permissions for the directory with a setgid bit
 chmod 2770 /home/manager
-
+       OR
+chmod 770 /home/manager
+chmod g+s /home/manager
 # Step 5: Verify the permissions
 ls -ld /home/manager
 # Output:
@@ -338,7 +342,7 @@ ls -l /home/manager/file1.txt
 ```bash
 # Step 1: Check the current system time and NTP status
 timedatectl
-
+service ntp start
 # Step 2: Restart the chrony service
 systemctl restart chronyd.service
 
