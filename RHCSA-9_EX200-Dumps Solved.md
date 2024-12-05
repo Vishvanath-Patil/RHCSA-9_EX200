@@ -395,6 +395,8 @@ Output:
 ## Steps:
 
 ```bash
+# yum install autofs -y
+
 # Step 1: Enable and start the AutoFS service
 systemctl enable autofs.service
 systemctl start autofs.service
