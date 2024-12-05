@@ -395,17 +395,11 @@ Output:
 ## Steps:
 
 ```bash
-# Step 1: Verify the existence of `remoteuserX`
-getent passwd remoteuserX
-
-# Step 2: Install AutoFS package
-yum install autofs.x86_64 -y
-
-# Step 3: Enable and start the AutoFS service
+# Step 1: Enable and start the AutoFS service
 systemctl enable autofs.service
 systemctl start autofs.service
 
-# Step 4: Configure AutoFS in the `auto.master` file
+# Step 2: Configure AutoFS in the `auto.master` file
 vim /etc/auto.master
 
 # Add the following entry:
@@ -413,7 +407,7 @@ vim /etc/auto.master
 
 :wq!
 
-# Step 5: Configure AutoFS in the `auto.misc` file
+# Step 3: Configure AutoFS in the `auto.misc` file
 vim /etc/auto.misc
 
 # Add the following line:
