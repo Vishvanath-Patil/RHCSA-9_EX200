@@ -100,8 +100,8 @@ To make the mount persistent across reboots, add an entry to `/etc/fstab`:
 
 5. Verify the mount:
    ```bash
-df -h
-```
+   df -Th
+   ```
 
 ---
 
