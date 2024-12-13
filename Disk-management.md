@@ -196,8 +196,8 @@ a. Extending an LV
 Conditions:
 Ensure the VG has free space.
 Command:
-lvextend -L +5G /dev/vg_name/lv_name
-xfs_growfs /mnt/mountpoint
+# lvextend -L +5G /dev/vg_name/lv_name
+# xfs_growfs /mnt/mountpoint
 
 b. Reducing an LV
 Conditions:
@@ -205,6 +205,6 @@ Unmount the LV before resizing.
 Backup data as reducing can lead to data loss.
 Command:
 umount /mnt/mountpoint
-lvreduce -L -5G /dev/vg_name/lv_name
-mount /dev/vg_name/lv_name /mnt/mountpoint
+# lvreduce -L -5G /dev/vg_name/lv_name
+# mount /dev/vg_name/lv_name /mnt/mountpoint
 ```
