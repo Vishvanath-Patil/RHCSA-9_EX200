@@ -180,15 +180,15 @@ mount /dev/my_vg/my_lv /mnt/mydata
 ```bash
 Physical Volume (PV):
 Base level representing raw disks or partitions.
-Command: pvcreate.
+# pvcreate.
 
 Volume Group (VG):
 Groups multiple PVs into a single storage pool.
-Command: vgcreate.
+# vgcreate.
 
 Logical Volume (LV):
 Allocates space from a VG for use as a file system or SWAP.
-Command: lvcreate.
+# lvcreate.
 
 Conditions for Advanced Operations
 
