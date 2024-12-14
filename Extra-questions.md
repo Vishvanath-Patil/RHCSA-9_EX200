@@ -10,8 +10,11 @@ partprobe /dev/vdb
 pvcreate /dev/vdb1
 vgcreate myvg /dev/vdb1
 lvcreate -n mylv -l 40 myvg /dev/vdb1
+OR
+lvcraete -n mylv -L 160M myvg /dev/vdb1
 mkfs.ext4 /dev/myvg/mylv
 mkdir /mylav
+mount /dev/myvg/mylv /mylv
 blkid
 Copy --> /dev/mapper/myvg-mylv
 vim /etc/fstab
