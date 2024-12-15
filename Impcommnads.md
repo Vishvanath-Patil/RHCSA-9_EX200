@@ -50,4 +50,20 @@ yum install httpd* -y
 systemctl enable --now httpd
 systemctl status httpd
 ```
+```bash
+Steps to Remount the Root Filesystem as Read-Write
+Remount the Root Filesystem (/) as Read-Write: Since the root filesystem (/) is mounted as read-only, you can remount it as read-write using the following command:
+
+sudo mount -o remount,rw /
+This will remount the root filesystem in read-write mode, allowing you to make changes and run lvcreate.
+
+Verify the Remount: After remounting, verify that the filesystem is now in read-write mode:
+
+mount | grep "ro,"
+The root filesystem (/dev/nvme0n1p3) should no longer appear with the ro flag.
+
+fdisk -l
+
+parted /dev/nv print free
+```
 
