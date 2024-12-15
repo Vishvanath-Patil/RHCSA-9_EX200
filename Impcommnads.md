@@ -64,6 +64,6 @@ The root filesystem (/dev/nvme0n1p3) should no longer appear with the ro flag.
 
 fdisk -l
 
-parted /dev/nv print free
+parted /dev/nvme0n1 print free
 ```
 
