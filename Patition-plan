@@ -1,0 +1,54 @@
+```bash
+partition layout for a typical UEFI installation in GPT format, presented in a table:
+
+Partition	Size	File System	Mount Point	Partition Type
+/dev/nvme0n1p1	512MB	vfat (FAT32)	/boot/efi	EFI System Partition
+/dev/nvme0n1p2	1GB	ext4 or xfs	/boot	Primary
+/dev/nvme0n1p3	40GB	ext4 or xfs	/	Primary
+/dev/nvme0n1p4	10GB	ext4 or xfs	/home	Primary
+/dev/nvme0n1p5	4GB	ext4 or xfs	/var	Primary
+/dev/nvme0n1p6	1GB	ext4 or xfs	/tmp	Primary
+/dev/nvme0n1p7	4GB	swap	N/A	Primary (Swap)
+Description of the Partitions:
+EFI System Partition (/boot/efi):
+
+Size: 512MB (minimum, can be larger if preferred)
+File system: vfat (FAT32) — required for UEFI boot.
+Partition Type: EFI System Partition.
+Boot Partition (/boot):
+
+Size: 1GB (usually enough for boot-related files).
+File system: ext4 or xfs (you can choose based on preference).
+Partition Type: Primary.
+Root Partition (/):
+
+Size: 40GB or more (depends on your needs).
+File system: ext4 or xfs (most common choices).
+Partition Type: Primary.
+Home Partition (/home) (optional):
+
+Size: 10GB or more (based on your usage needs).
+File system: ext4 or xfs.
+Partition Type: Primary.
+Var Partition (/var) (optional):
+
+Size: 4GB (this can vary based on the system's usage).
+File system: ext4 or xfs.
+Partition Type: Primary.
+Temp Partition (/tmp) (optional):
+
+Size: 1GB or more (depends on usage and requirements).
+File system: ext4 or xfs.
+Partition Type: Primary.
+Swap Partition:
+
+Size: 4GB or more (recommended based on the amount of RAM in the system).
+File system: swap (used as virtual memory).
+Partition Type: Primary (or Logical, if you have many partitions).
+Notes:
+EFI System Partition (/boot/efi) is crucial for UEFI boot, and it must be formatted with FAT32 (vfat).
+The root partition (/) can be the largest, typically around 40GB or more, depending on the system's purpose.
+You may opt to create separate partitions for directories like /home, /var, and /tmp depending on your system needs.
+Swap should generally be 4GB or more, but it's based on the available RAM and system usage.
+This table ensures a proper partitioning scheme for a Red Hat 9 installation using UEFI and GPT. Let me know if you need further details!
+```
