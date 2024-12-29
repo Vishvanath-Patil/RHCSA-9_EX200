@@ -159,3 +159,27 @@ To ensure the LV is mounted persistently after a reboot, add an entry to `/etc/f
 ## **Summary**
 
 You have successfully set up an LVM with 20GB disk space, created a 10GB logical volume, formatted and mounted it, and expanded the LV by 5GB. The logical volume is now ready for use and persistently mounted.
+---
+```bash
+Check Available Free Space: Before running the lvextend command, you should verify how much free space is available in your volume group. You can use the following command to check:
+
+vgdisplay
+Look for the "Free PE" (Physical Extents) value to determine how much free space is available.
+
+Extend the Logical Volume: If you are sure there is free space, you can run:
+
+lvextend -l +100%FREE /dev/mapper/rhel-root
+Resize the Filesystem: After extending the logical volume, you need to resize the filesystem to use the new space. Depending on the filesystem type, you can run one of these commands:
+
+For ext4:
+
+resize2fs /dev/mapper/rhel-root
+For XFS (common in newer distributions):
+
+xfs_growfs /dev/mapper/rhel-root
+Verify the Changes: After completing the steps, you can check the new size of the logical volume and filesystem:
+
+lvdisplay /dev/mapper/rhel-root
+df -h
+This will confirm that the logical volume has been extended and that the filesystem is now utilizing the additional space.
+```
